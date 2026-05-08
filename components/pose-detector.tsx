@@ -33,6 +33,11 @@ const KP = {
 }
 
 const MIN_SCORE = 0.3
+// Stability tuning
+const EMA_ALPHA = 0.35 // 0..1, lower = smoother (more lag)
+const CONFIRM_FRAMES = 3 // frames the angle must stay past a threshold before phase flips
+const MIN_REP_GAP_MS = 400 // refractory period — ignore reps inside this window
+const MIN_PEAK_HOLD_MS = 120 // must dwell at peak this long before counting on return
 
 function angle(
   a: { x: number; y: number },
@@ -273,6 +278,14 @@ export default function PoseDetector({
   const frameCountRef = useRef(0)
   const lastFpsTickRef = useRef(0)
 
+  // Stability state
+  const smoothedAngleRef = useRef<number | null>(null)
+  const phaseCandidateRef = useRef<"none" | "to-peak" | "to-rest">("none")
+  const phaseFramesRef = useRef(0)
+  const peakEnteredAtRef = useRef<number>(0)
+  const lastRepAtRef = useRef<number>(0)
+  const lostFramesRef = useRef(0)
+
   const [status, setStatus] = useState<"idle" | "loading" | "ready" | "running" | "error">("idle")
   const [reps, setReps] = useState(0)
   const [currentAngle, setCurrentAngle] = useState<number | null>(null)
@@ -282,11 +295,21 @@ export default function PoseDetector({
   const [duration, setDuration] = useState(0)
   const [atPeakState, setAtPeakState] = useState(false)
 
+  const resetStability = () => {
+    atPeakRef.current = false
+    setAtPeakState(false)
+    smoothedAngleRef.current = null
+    phaseCandidateRef.current = "none"
+    phaseFramesRef.current = 0
+    peakEnteredAtRef.current = 0
+    lastRepAtRef.current = 0
+    lostFramesRef.current = 0
+  }
+
   useEffect(() => {
     exerciseRef.current = exercise
     setReps(0)
-    atPeakRef.current = false
-    setAtPeakState(false)
+    resetStability()
   }, [exercise])
 
   useEffect(() => {
@@ -372,8 +395,7 @@ export default function PoseDetector({
 
       setStatus("running")
       startedAtRef.current = Date.now()
-      atPeakRef.current = false
-      setAtPeakState(false)
+      resetStability()
       setDuration(0)
       lastFpsTickRef.current = performance.now()
       frameCountRef.current = 0
@@ -401,8 +423,9 @@ export default function PoseDetector({
 
   const reset = () => {
     setReps(0)
-    atPeakRef.current = false
+    resetStability()
     startedAtRef.current = Date.now()
+    setDuration(0)
   }
 
   const loop = async () => {
@@ -464,30 +487,80 @@ export default function PoseDetector({
 
   const updateRepState = (keypoints: any[]) => {
     const cfg = EXERCISES[exerciseRef.current]
-    const a = cfg.measure(keypoints)
-    if (a == null) return
+    const raw = cfg.measure(keypoints)
+
+    // Lost track — keypoint confidence too low. Hold the previous smoothed
+    // value briefly, then surface a "fix your position" hint.
+    if (raw == null) {
+      lostFramesRef.current += 1
+      if (lostFramesRef.current >= 12) {
+        // ~0.4s at 30fps
+        setFeedback("Step back so I can see you")
+      }
+      return
+    }
+    lostFramesRef.current = 0
+
+    // EMA smoothing — kills high-frequency jitter from noisy keypoints
+    const prev = smoothedAngleRef.current
+    const a =
+      prev == null ? raw : prev + EMA_ALPHA * (raw - prev)
+    smoothedAngleRef.current = a
+
     setCurrentAngle(a)
     setFeedback(cfg.feedback(a, atPeakRef.current))
 
-    if (cfg.direction === "flex") {
-      // peak = small angle, rest = large
-      if (!atPeakRef.current && a < cfg.peakThreshold) {
-        atPeakRef.current = true
-        setAtPeakState(true)
-      } else if (atPeakRef.current && a > cfg.restThreshold) {
-        atPeakRef.current = false
-        setAtPeakState(false)
-        setReps((r) => r + 1)
+    const now = performance.now()
+    const flex = cfg.direction === "flex"
+    const pastPeakLine = flex ? a < cfg.peakThreshold : a > cfg.peakThreshold
+    const pastRestLine = flex ? a > cfg.restThreshold : a < cfg.restThreshold
+
+    // Phase machine: angle must stay past a threshold for CONFIRM_FRAMES before flipping.
+    if (!atPeakRef.current) {
+      if (pastPeakLine) {
+        if (phaseCandidateRef.current === "to-peak") {
+          phaseFramesRef.current += 1
+        } else {
+          phaseCandidateRef.current = "to-peak"
+          phaseFramesRef.current = 1
+        }
+        if (phaseFramesRef.current >= CONFIRM_FRAMES) {
+          atPeakRef.current = true
+          setAtPeakState(true)
+          peakEnteredAtRef.current = now
+          phaseCandidateRef.current = "none"
+          phaseFramesRef.current = 0
+        }
+      } else if (phaseCandidateRef.current === "to-peak") {
+        // angle backed off — abandon the candidate
+        phaseCandidateRef.current = "none"
+        phaseFramesRef.current = 0
       }
     } else {
-      // extend: peak = large angle, rest = small
-      if (!atPeakRef.current && a > cfg.peakThreshold) {
-        atPeakRef.current = true
-        setAtPeakState(true)
-      } else if (atPeakRef.current && a < cfg.restThreshold) {
-        atPeakRef.current = false
-        setAtPeakState(false)
-        setReps((r) => r + 1)
+      if (pastRestLine) {
+        if (phaseCandidateRef.current === "to-rest") {
+          phaseFramesRef.current += 1
+        } else {
+          phaseCandidateRef.current = "to-rest"
+          phaseFramesRef.current = 1
+        }
+        const heldPeak = now - peakEnteredAtRef.current >= MIN_PEAK_HOLD_MS
+        const sinceLastRep = now - lastRepAtRef.current
+        if (
+          phaseFramesRef.current >= CONFIRM_FRAMES &&
+          heldPeak &&
+          sinceLastRep >= MIN_REP_GAP_MS
+        ) {
+          atPeakRef.current = false
+          setAtPeakState(false)
+          phaseCandidateRef.current = "none"
+          phaseFramesRef.current = 0
+          lastRepAtRef.current = now
+          setReps((r) => r + 1)
+        }
+      } else if (phaseCandidateRef.current === "to-rest") {
+        phaseCandidateRef.current = "none"
+        phaseFramesRef.current = 0
       }
     }
   }
