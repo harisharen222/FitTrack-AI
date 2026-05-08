@@ -55,17 +55,17 @@ npm run dev
 
 4. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## Deployment on Netlify
+## Deployment on Vercel
 
-This project is configured for easy deployment on Netlify.
+This project is configured for easy deployment on Vercel.
 
 ### Automatic Deployment
 
 1. Push your code to GitHub
-2. Go to [Netlify](https://www.netlify.com/)
+2. Go to [Vercel](https://www.Vercel.com/)
 3. Click "Add new site" → "Import an existing project"
 4. Connect your GitHub account and select this repository
-5. Netlify will automatically detect the settings from `netlify.toml`
+5. Vercel will automatically detect the settings from `Vercel.toml`
 6. Click "Deploy site"
 
 ### Manual Deployment
@@ -75,13 +75,13 @@ This project is configured for easy deployment on Netlify.
 npm run build
 ```
 
-2. Deploy the `.next` folder to Netlify
+2. Deploy the `.next` folder to Vercel
 
-### Netlify Configuration
+### Vercel Configuration
 
-The `netlify.toml` file is already configured with:
+The `Vercel.toml` file is already configured with:
 - Build command: `npm run build`
-- Next.js plugin: `@netlify/plugin-nextjs`
+- Next.js plugin: `@Vercel/plugin-nextjs`
 - Node version: 18
 
 ## Project Structure
