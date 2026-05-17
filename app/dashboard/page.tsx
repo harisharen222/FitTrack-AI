@@ -16,6 +16,7 @@ import {
 } from "lucide-react"
 import DashboardHeader from "@/components/dashboard-header"
 import ActivityHeatmap from "@/components/activity-heatmap"
+import ShareWorkoutButton from "@/components/share-workout-button"
 import {
   getMyStats,
   getRecentWorkouts,
@@ -212,9 +213,26 @@ export default async function DashboardPage() {
                               </div>
                             </div>
                           </div>
-                          <div className="text-right">
-                            <div className="font-medium">{w.reps} reps</div>
-                            <div className="text-xs text-emerald-500">+{w.xpEarned} XP</div>
+                          <div className="flex items-center gap-2">
+                            <div className="text-right">
+                              <div className="font-medium">{w.reps} reps</div>
+                              <div className="text-xs text-emerald-500">+{w.xpEarned} XP</div>
+                            </div>
+                            <ShareWorkoutButton
+                              size="icon"
+                              variant="ghost"
+                              label=""
+                              data={{
+                                username: stats.username,
+                                level: stats.level,
+                                exerciseName: meta.name,
+                                exerciseEmoji: meta.emoji,
+                                reps: w.reps,
+                                xpEarned: w.xpEarned,
+                                date: new Date(w.createdAt),
+                                variant: "workout",
+                              }}
+                            />
                           </div>
                         </li>
                       )

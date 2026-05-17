@@ -48,6 +48,8 @@
     "@tensorflow/tfjs-backend-webgl": "^4.22.0",
     "@tensorflow/tfjs-converter": "^4.22.0",
     "@tensorflow/tfjs-core": "^4.22.0",
+    "@zxing/browser": "^0.2.0",
+    "@zxing/library": "^0.22.0",
     "ai": "^6.0.176",
     "autoprefixer": "^10.4.20",
     "canvas-confetti": "^1.9.4",

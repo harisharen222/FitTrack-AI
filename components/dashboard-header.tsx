@@ -10,9 +10,12 @@ import CoachWidget from "@/components/coach-widget"
 const NAV = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/workout", label: "Workout" },
+  { href: "/nutrition", label: "Nutrition" },
+  { href: "/challenges", label: "Challenges" },
   { href: "/coach", label: "Coach" },
   { href: "/tutorials", label: "Tutorials" },
   { href: "/leaderboard", label: "Leaderboard" },
+  { href: "/reports/monthly", label: "Report" },
 ]
 
 export default function DashboardHeader() {

@@ -4,6 +4,7 @@ import { Inter } from "next/font/google"
 import type { Metadata } from "next"
 import { ClerkProvider } from "@clerk/nextjs"
 import { Toaster } from "@/components/ui/toaster"
+import { Toaster as SonnerToaster } from "@/components/ui/sonner"
 import { ThemeProvider } from "@/components/theme-provider"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -31,6 +32,7 @@ export default function RootLayout({
           >
             {children}
             <Toaster />
+            <SonnerToaster />
           </ThemeProvider>
         </body>
       </html>

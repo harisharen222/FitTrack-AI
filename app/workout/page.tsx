@@ -1,7 +1,9 @@
 "use client"
 
 import dynamic from "next/dynamic"
-import { useCallback, useState, useTransition } from "react"
+import { useCallback, useEffect, useState, useTransition } from "react"
+import ShareWorkoutButton from "@/components/share-workout-button"
+import { getMyStats } from "@/lib/actions"
 import { Card, CardContent } from "@/components/ui/card"
 import { useToast } from "@/components/ui/use-toast"
 import DashboardHeader from "@/components/dashboard-header"
@@ -138,6 +140,19 @@ export default function WorkoutPage() {
   const [filter, setFilter] = useState<ExMeta["category"] | "all">("all")
   const [, startTransition] = useTransition()
   const [telemetry, setTelemetry] = useState<Telemetry | null>(null)
+  const [me, setMe] = useState<{ username: string; level: number } | null>(null)
+  const [lastSaved, setLastSaved] = useState<{
+    reps: number
+    xpEarned: number
+    exerciseName: string
+    exerciseEmoji: string
+    isPR: boolean
+    date: Date
+  } | null>(null)
+
+  useEffect(() => {
+    getMyStats().then((s) => s && setMe({ username: s.username, level: s.level }))
+  }, [])
 
   const handleTelemetry = useCallback((t: Telemetry) => setTelemetry(t), [])
 
@@ -179,6 +194,15 @@ export default function WorkoutPage() {
       try {
         const res = await recordWorkout({ exercise, reps, durationSec })
         celebrate(res, reps, current.name.toLowerCase())
+        setLastSaved({
+          reps,
+          xpEarned: res.xpEarned,
+          exerciseName: current.name,
+          exerciseEmoji: current.emoji,
+          isPR: res.isPR,
+          date: new Date(),
+        })
+        if (me) setMe({ ...me, level: res.level })
       } catch {
         toast({ title: "Failed to save", variant: "destructive" })
       }
@@ -243,6 +267,43 @@ export default function WorkoutPage() {
               </button>
             ))}
           </div>
+
+          {lastSaved && me && (
+            <Card className="bg-gradient-to-br from-emerald-500/15 via-teal-500/10 to-violet-500/15 border-emerald-500/30">
+              <CardContent className="py-4 flex items-center justify-between gap-4 flex-wrap">
+                <div className="flex items-center gap-3">
+                  <div className="text-3xl">{lastSaved.exerciseEmoji}</div>
+                  <div>
+                    <div className="font-semibold">
+                      {lastSaved.isPR && <span className="text-yellow-500">⭐ PR · </span>}
+                      Saved {lastSaved.reps} {lastSaved.exerciseName.toLowerCase()}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      +{lastSaved.xpEarned} XP — share the moment?
+                    </div>
+                  </div>
+                </div>
+                <ShareWorkoutButton
+                  variant="default"
+                  size="default"
+                  className="gradient-bg text-white"
+                  label="Share card"
+                  data={{
+                    username: me.username,
+                    level: me.level,
+                    exerciseName: lastSaved.exerciseName,
+                    exerciseEmoji: lastSaved.exerciseEmoji,
+                    reps: lastSaved.reps,
+                    xpEarned: lastSaved.xpEarned,
+                    isPR: lastSaved.isPR,
+                    date: lastSaved.date,
+                    variant: lastSaved.isPR ? "achievement" : "workout",
+                    subtitle: lastSaved.isPR ? "PERSONAL RECORD" : undefined,
+                  }}
+                />
+              </CardContent>
+            </Card>
+          )}
 
           <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
             <PoseDetector
