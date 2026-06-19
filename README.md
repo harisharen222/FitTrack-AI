@@ -1,118 +1,84 @@
-# FitTrack AI - AI-Powered Fitness Tracking
+# FitTrack AI
 
-A modern fitness tracking application built with Next.js 14, featuring AI-powered exercise detection, rep counting, and gamification features.
+Welcome to **FitTrack AI**, a modern, AI-powered fitness tracking application designed and built from the ground up to revolutionize your workout routines! This app leverages advanced pose detection to count your reps, track your progress, and gamify your fitness journey.
 
-## Features
+## 🚀 Features
 
-- 🤖 **AI Exercise Detection** - Advanced pose detection technology tracks your movements and counts reps automatically
-- 📊 **Progress Tracking** - Detailed analytics and progress visualization
-- 🏆 **XP & Leaderboards** - Earn XP for every rep, level up, and compete with friends
-- 📹 **Tutorial Videos** - Learn proper form with AI-guided tutorial videos
-- 🎨 **Modern UI** - Beautiful, responsive design with dark mode support
+- **🤖 AI Exercise Detection & Rep Counting:** Using cutting-edge pose detection technology, FitTrack AI automatically recognizes your movements and counts your reps.
+- **📊 Progress Tracking:** Detailed analytics and visualizations to help you understand your performance over time.
+- **🏆 Gamification & Leaderboards:** Earn XP for every rep you complete, level up your profile, and compete with friends on the leaderboard.
+- **📹 AI-Guided Tutorials:** Learn the proper form for every exercise with our built-in video tutorials.
+- **🎨 Premium Modern UI:** A beautiful, responsive, and intuitive user interface with full dark mode support.
 
-## Tech Stack
+## 🛠️ Technology Stack
 
-- **Framework**: Next.js 14 (App Router)
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS
-- **UI Components**: Radix UI + shadcn/ui
-- **Auth**: Clerk
-- **Database**: Neon (Postgres) + Drizzle ORM
-- **Form Handling**: React Hook Form + Zod
+We built this project using a modern and robust tech stack:
 
-## Setup
+- **Framework:** [Next.js 14](https://nextjs.org/) (App Router)
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS
+- **UI Components:** Radix UI & shadcn/ui
+- **Authentication:** Clerk
+- **Database:** Neon (Serverless Postgres) + Drizzle ORM
+- **Forms & Validation:** React Hook Form + Zod
+- **AI Models:** TensorFlow.js Pose Detection
 
-1. Copy `.env.example` to `.env.local` and fill in:
-   - `DATABASE_URL` from [Neon](https://neon.tech)
-   - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` and `CLERK_SECRET_KEY` from [Clerk](https://clerk.com)
-2. Push the schema to Neon: `npm run db:push`
-3. Start the dev server: `npm run dev`
+## 💻 Getting Started
 
-## Getting Started
+Follow these steps to set up the project locally:
 
 ### Prerequisites
 
-- Node.js 18+ 
+- Node.js 18+
 - npm or yarn
 
 ### Installation
 
-1. Clone the repository:
-```bash
-git clone https://github.com/naveenkm21/fitness-tracker.git
-cd fitness-tracker
-```
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/harisharen222/FitTrack-AI.git
+   cd fitness-tracker
+   ```
 
-2. Install dependencies:
-```bash
-npm install
-```
+2. **Install the dependencies:**
+   ```bash
+   npm install
+   ```
 
-3. Run the development server:
-```bash
-npm run dev
-```
+3. **Set up environment variables:**
+   Copy the example environment file and fill in your keys:
+   ```bash
+   cp .env.example .env.local
+   ```
+   You will need:
+   - `DATABASE_URL` from your Neon database setup.
+   - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` and `CLERK_SECRET_KEY` from your Clerk dashboard.
 
-4. Open [http://localhost:3000](http://localhost:3000) in your browser.
+4. **Initialize the database:**
+   Push the schema to your Neon database using Drizzle:
+   ```bash
+   npm run db:push
+   ```
 
-## Deployment on Vercel
+5. **Start the development server:**
+   ```bash
+   npm run dev
+   ```
 
-This project is configured for easy deployment on Vercel.
+6. Open [http://localhost:3000](http://localhost:3000) in your browser to see the app in action!
 
-### Automatic Deployment
+## 📂 Project Structure
 
-1. Push your code to GitHub
-2. Go to [Vercel](https://www.Vercel.com/)
-3. Click "Add new site" → "Import an existing project"
-4. Connect your GitHub account and select this repository
-5. Vercel will automatically detect the settings from `Vercel.toml`
-6. Click "Deploy site"
+- `app/` - The core Next.js application routes (Dashboard, Leaderboard, Workout, etc.)
+- `components/` - Reusable React components and UI elements.
+- `lib/` - Utility functions and helpers.
+- `public/` - Static assets and images.
+- `styles/` - Global stylesheets and Tailwind configuration.
 
-### Manual Deployment
+## 👨‍💻 Author
 
-1. Build the project:
-```bash
-npm run build
-```
+Built with ❤️ by **harisharen222**.
 
-2. Deploy the `.next` folder to Vercel
+## 📄 License
 
-### Vercel Configuration
-
-The `Vercel.toml` file is already configured with:
-- Build command: `npm run build`
-- Next.js plugin: `@Vercel/plugin-nextjs`
-- Node version: 18
-
-## Project Structure
-
-```
-├── app/                    # Next.js app directory
-│   ├── dashboard/         # Dashboard page
-│   ├── leaderboard/       # Leaderboard page
-│   ├── login/            # Login page
-│   ├── register/         # Registration page
-│   ├── tutorials/        # Tutorials page
-│   └── workout/          # Workout page
-├── components/            # React components
-│   ├── ui/               # UI components (shadcn/ui)
-│   └── ...               # Other components
-├── public/               # Static assets
-└── lib/                  # Utility functions
-```
-
-## Scripts
-
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run start` - Start production server
-- `npm run lint` - Run ESLint
-
-## License
-
-MIT
-
-## Author
-
-naveenkm21
-
+This project is licensed under the MIT License.
