@@ -77,7 +77,7 @@ Follow these steps to set up the project locally:
 
 ## 👨‍💻 Author
 
-Built with ❤️ by **harisharen222**.
+**harisharen222**
 
 ## 📄 License
 
